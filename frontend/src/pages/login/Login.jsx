@@ -3,8 +3,12 @@ import "./login.css";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { storeToken } from "../../services/LocalStorageService";
+import {
+  ExpiredRefreshToken,
+  storeToken,
+} from "../../services/LocalStorageService";
 import { setUserToken } from "../../features/authSlice";
+import { ExpiredToken } from "../../services/LocalStorageService";
 
 export default function Login() {
   const [login, { isloading }] = useLoginUserMutation();
@@ -31,13 +35,16 @@ export default function Login() {
           access_token: res.data.token["access"],
         })
       );
+      ExpiredToken(dispatch);
+      ExpiredRefreshToken(dispatch);
+
       navigate("/");
     }
   };
   return (
     <div className="login">
       <span className="loginTitle">Login</span>
-      <form className="loginForm"  onSubmit={submitHandler}>
+      <form className="loginForm" onSubmit={submitHandler}>
         <label>Phone Number</label>
         <input
           className="loginInput"
@@ -52,7 +59,9 @@ export default function Login() {
           name="password"
           placeholder="Enter your password..."
         />
-        <button type="submit" className="loginButton">Login</button>
+        <button type="submit" className="loginButton">
+          Login
+        </button>
       </form>
       <button className="loginRegisterButton">Register</button>
     </div>

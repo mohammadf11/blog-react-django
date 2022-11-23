@@ -6,12 +6,14 @@ import Settings from "./pages/settings/Settings";
 import Single from "./pages/single/Single";
 import Write from "./pages/write/Write";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setUserToken } from "./features/authSlice";
 import { getToken } from "./services/LocalStorageService";
 
 function App() {
+  const user = useSelector((state) => state.auth.access_token);
+  
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(
@@ -20,7 +22,6 @@ function App() {
       })
     );
   }, []);
-  const user = useSelector((state) => state.auth.access_token);
   return (
     <Router>
       <Topbar user={user} />

@@ -1,7 +1,10 @@
 import { Link, useParams } from "react-router-dom";
 import "./singlePost.css";
 import { useNavigate } from "react-router-dom";
-import { usePostDeleteMutation, usePostDetailQuery } from "../../services/postApi";
+import {
+  usePostDeleteMutation,
+  usePostDetailQuery,
+} from "../../services/postApi";
 
 export default function SinglePost() {
   const navigate = useNavigate();
@@ -10,9 +13,15 @@ export default function SinglePost() {
   const { data: post } = usePostDetailQuery(id);
   const [deletePost] = usePostDeleteMutation();
 
-  const deletePostHandler = async() => {
+  const deletePostHandler = async () => {
     const res = await deletePost(id);
     navigate("/");
+  };
+
+  const editPostHandler = () => {
+    console.log(post);
+    navigate("/write", { state: { initPost: post } });
+
   };
   return (
     <>
@@ -23,8 +32,14 @@ export default function SinglePost() {
             <h1 className="singlePostTitle">
               {post.title}
               <div className="singlePostEdit">
-                <i className="singlePostIcon far fa-edit"></i>
-                <i className="singlePostIcon far fa-trash-alt" onClick={deletePostHandler}></i>
+                <i
+                  className="singlePostIcon far fa-edit"
+                  onClick={editPostHandler}
+                ></i>
+                <i
+                  className="singlePostIcon far fa-trash-alt"
+                  onClick={deletePostHandler}
+                ></i>
               </div>
             </h1>
             <div className="singlePostInfo">

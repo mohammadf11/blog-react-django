@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { storeToken } from "../../services/LocalStorageService.js";
+import { ExpiredRefreshToken, storeToken } from "../../services/LocalStorageService.js";
 import {
   useRegisterUserMutation,
   useValidInfoMutation,
@@ -8,6 +8,7 @@ import "./register.css";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setUserToken } from "../../features/authSlice.js";
+import { ExpiredToken } from "../../services/LocalStorageService";
 export default function Register() {
   const [server_error, setServerError] = useState({});
   const [verifyCode, setVerifyCode] = useState("");
@@ -61,9 +62,11 @@ export default function Register() {
       storeToken(res.data.token);
       dispatch(
         setUserToken({
-          access_token: res.data.token['access'],
+          access_token: res.data.token["access"],
         })
       );
+      ExpiredToken(dispatch);
+      ExpiredRefreshToken(dispatch);
       navigate("/");
     }
   };

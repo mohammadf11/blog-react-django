@@ -1,15 +1,22 @@
 import "./write.css";
 import { useState } from "react";
-import { usePostCreateMutation } from "../../services/postApi";
+import {
+  usePostCreateMutation,
+  usePostUpdateMutation,
+} from "../../services/postApi";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 export default function Write() {
-  const [photo, setPhoto] = useState(null);
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
+  const location = useLocation();
+  const initPost = location.state ? location.state.initPost : undefined;
+  const [photo, setPhoto] = useState(initPost ? initPost.photo : null);
+  const [title, setTitle] = useState(initPost ? initPost.title : "");
+  const [body, setBody] = useState(initPost ? initPost.body : "");
   const [serverError, setServerError] = useState("");
 
   const [postCreate] = usePostCreateMutation();
+  const [postUpdate] = usePostUpdateMutation();
   const navigate = useNavigate();
 
   const clearData = () => {
@@ -17,15 +24,25 @@ export default function Write() {
     setTitle("");
     setBody("");
   };
-
+  const getPhoto = () => {
+    if (initPost && initPost.photo === photo) return photo;
+    if (photo !== null) return URL.createObjectURL(photo);
+    return null;;;
+  };
   const postCreateHandler = async (e) => {
     e.preventDefault();
     let formData = new FormData();
     formData.append("author", 1);
-    formData.append("photo", photo);
+    if (initPost) {
+      if (initPost.photo !== photo) formData.append("photo", photo);
+    } else formData.append("photo", photo);
+
     formData.append("title", title);
     formData.append("body", body);
-    const res = await postCreate(formData);
+    let res;
+    if (initPost) res = await postUpdate({ id: initPost.id, data: formData });
+    else res = await postCreate(formData);
+
     if (res.error) {
       const errors = res.error.data;
       for (const error in errors) {
@@ -41,11 +58,7 @@ export default function Write() {
 
   return (
     <div className="write">
-      <img
-        className="writeImg"
-        src="https://images.pexels.com/photos/6685428/pexels-photo-6685428.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500"
-        alt=""
-      />
+      {getPhoto && <img className="writeImg" src={getPhoto()} alt="" />}
       <form className="writeForm" onSubmit={postCreateHandler}>
         {serverError.title ? (
           <div className="error">
@@ -60,7 +73,9 @@ export default function Write() {
           </label>
           <input
             id="fileInput"
-            onChange={(e) => setPhoto(e.target.files[0])}
+            onChange={(e) => {
+              setPhoto(e.target.files[0]);
+            }}
             type="file"
             style={{ display: "none" }}
           />
